@@ -7,7 +7,7 @@ from tqdm import tqdm
 import shortuuid
 import ray
 
-from fastchat import get_conversation_template
+from fastchat.model import get_conversation_template
 
 
 def run_eval(model_path, model_id, question_file, answer_file, num_gpus):
@@ -60,7 +60,7 @@ def get_model_answers(model_path, model_id, question_jsons):
             temperature=0.7,
             max_new_tokens=1024,
         )
-        output_ids = output_ids[0][len(input_ids[0]):]
+        output_ids = output_ids[0][len(input_ids[0]) :]
         outputs = tokenizer.decode(output_ids, skip_special_tokens=True).strip()
 
         ans_id = shortuuid.uuid()
