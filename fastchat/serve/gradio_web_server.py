@@ -152,7 +152,7 @@ def add_text(state, text, request: gr.Request):
                 no_change_btn,
             ) * 5
 
-    text = text[:1536]  # Hard cut-off
+    #text = text[:1536]  # Hard cut-off
     state.append_message(state.roles[0], text)
     state.append_message(state.roles[1], None)
     state.skip_next = False
@@ -482,7 +482,7 @@ By using this service, users are required to agree to the following terms: The s
         max_output_tokens = gr.Slider(
             minimum=0,
             maximum=1024,
-            value=512,
+            value=256,
             step=64,
             interactive=True,
             label="Max output tokens",

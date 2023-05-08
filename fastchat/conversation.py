@@ -17,6 +17,7 @@ class SeparatorStyle(Enum):
     DOLLY = auto()
     RWKV = auto()
     PHOENIX = auto()
+    NONE = auto()
 
 
 @dataclasses.dataclass
@@ -38,7 +39,7 @@ class Conversation:
     sep: str
     sep2: str = None
     # Stop criteria (the default one is EOS token)
-    stop_str: str = None
+    stop_str: str = "#"
     # Stops generation if meeting any token in this list
     stop_token_ids: List[int] = None
 
@@ -63,9 +64,9 @@ class Conversation:
             ret = self.system + seps[0]
             for i, (role, message) in enumerate(self.messages):
                 if message:
-                    ret += role + ": " + message + seps[i % 2]
+                    ret += role + "" + message + seps[i % 2]
                 else:
-                    ret += role + ":"
+                    ret += role + ""
             return ret
         elif self.sep_style == SeparatorStyle.NO_COLON_SINGLE:
             ret = self.system
@@ -191,52 +192,25 @@ def get_conv_template(name: str) -> Conversation:
 # A template with one conversation example
 register_conv_template(Conversation(
     name="one_shot",
-    system="A chat between a curious human and an artificial intelligence assistant. "
-    "The assistant gives helpful, detailed, and polite answers to the human's questions.",
-    roles=("Human", "Assistant"),
-    messages=(
-        (
-            "Human",
-            "What are the key differences between renewable and non-renewable energy sources?",
-        ),
-        (
-            "Assistant",
-            "Renewable energy sources are those that can be replenished naturally in a relatively "
-            "short amount of time, such as solar, wind, hydro, geothermal, and biomass. "
-            "Non-renewable energy sources, on the other hand, are finite and will eventually be "
-            "depleted, such as coal, oil, and natural gas. Here are some key differences between "
-            "renewable and non-renewable energy sources:\n"
-            "1. Availability: Renewable energy sources are virtually inexhaustible, while non-renewable "
-            "energy sources are finite and will eventually run out.\n"
-            "2. Environmental impact: Renewable energy sources have a much lower environmental impact "
-            "than non-renewable sources, which can lead to air and water pollution, greenhouse gas emissions, "
-            "and other negative effects.\n"
-            "3. Cost: Renewable energy sources can be more expensive to initially set up, but they typically "
-            "have lower operational costs than non-renewable sources.\n"
-            "4. Reliability: Renewable energy sources are often more reliable and can be used in more remote "
-            "locations than non-renewable sources.\n"
-            "5. Flexibility: Renewable energy sources are often more flexible and can be adapted to different "
-            "situations and needs, while non-renewable sources are more rigid and inflexible.\n"
-            "6. Sustainability: Renewable energy sources are more sustainable over the long term, while "
-            "non-renewable sources are not, and their depletion can lead to economic and social instability.",
-        ),
-    ),
-    offset=2,
-    sep_style=SeparatorStyle.ADD_COLON_SINGLE,
-    sep="\n### ",
-    stop_str="###",
+    system=""
+    "",
+    roles=("",""),
+    messages=(),
+    offset=0,
+    sep_style=SeparatorStyle.ADD_COLON_TWO,
+    sep="",
+    stop_str="",
 ))
 
 # Vicuna v1.1 template
 register_conv_template(Conversation(
     name="vicuna_v1.1",
-    system="A chat between a curious user and an artificial intelligence assistant. "
-    "The assistant gives helpful, detailed, and polite answers to the user's questions.",
-    roles=("USER", "ASSISTANT"),
+    system="",
+    roles=("", ""),
     messages=(),
     offset=0,
     sep_style=SeparatorStyle.ADD_COLON_TWO,
-    sep=" ",
+    sep="",
     sep2="</s>",
 ))
 
@@ -343,7 +317,7 @@ Assistant: Hi, I'm Buddy, your AI assistant. How can I help you today?""",
 # Phoenix default template
 register_conv_template(Conversation(
     name="phoenix",
-    system="A chat between a curious human and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the human's questions.\n\n",
+    system="",
     roles=("Human", "Assistant"),
     messages=(),
     offset=0,
