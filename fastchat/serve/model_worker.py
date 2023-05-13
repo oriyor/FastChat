@@ -281,14 +281,30 @@ async def api_generate_stream(request: Request):
     background_tasks = create_background_tasks()
     return StreamingResponse(generator, background=background_tasks)
 
-
 @app.post("/worker_generate_completion")
-async def api_generate_completion(request: Request):
+async def api_generate_stream(request: Request):
     params = await request.json()
     await acquire_model_semaphore()
-    completion = worker.generate_completion(params)
+    generator = worker.generate_stream_gate(params)
+    res = [x for x in generator]
+    res_json = json.loads(res[-1].decode("utf-8")[:-1])
+    res_json_expanded = {"text": res_json['text'][len(params['prompt']):] if not res_json['error_code'] else "OOM",
+                          "finish_reason": "stop",
+                          "completion_tokens": len(res_json['text']) - len(params['prompt']),
+                          "prompt_tokens": len(params['prompt']),
+
+                        }
     background_tasks = create_background_tasks()
+    completion = json.dumps(res_json_expanded)
     return JSONResponse(content=completion, background=background_tasks)
+
+# @app.post("/worker_generate_completion")
+# async def api_generate_completion(request: Request):
+#     params = await request.json()
+#     await acquire_model_semaphore()
+#     completion = worker.generate_completion(params)
+#     background_tasks = create_background_tasks()
+#     return JSONResponse(content=completion, background=background_tasks)
 
 
 @app.post("/worker_get_embeddings")

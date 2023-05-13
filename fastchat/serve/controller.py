@@ -236,10 +236,11 @@ class Controller:
             return self.handle_no_worker(params, server_error_msg)
 
         try:
+            print(params)
             response = requests.post(
                 worker_addr + "/worker_generate_completion",
                 json=params,
-                timeout=15,
+                timeout=60,
             )
             return response.json()
         except requests.exceptions.RequestException as e:

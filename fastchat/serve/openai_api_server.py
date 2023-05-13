@@ -257,6 +257,7 @@ async def create_completion(request: CompletionRequest):
         "temperature": request.temperature,
         "max_tokens": request.max_tokens,
         "logprobs": request.logprobs,
+        "stop": request.stop
     }
 
     if request.stream:
@@ -291,7 +292,7 @@ async def generate_completion(payload: Dict[str, Any]):
     controller_address = app_settings.controller_address
     async with httpx.AsyncClient() as client:
         worker_addr = await _get_worker_address(payload["model"], client)
-
+        print(json)
         response = await client.post(
             worker_addr + "/worker_generate_completion",
             headers=headers,
