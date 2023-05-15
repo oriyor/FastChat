@@ -2,6 +2,7 @@
 import abc
 import gc
 import math
+import re
 from typing import Optional
 import sys
 import warnings
@@ -62,6 +63,11 @@ def generate_stream(
     echo = bool(params.get("echo", True))
     stop_token_ids = params.get("stop_token_ids", None) or []
     stop_token_ids.append(tokenizer.eos_token_id)
+
+    # check if stop_str is a regex
+    stop_regex = stop_str.startswith("r:")
+    if stop_regex:
+        stop_regex_pattern = stop_str.split("r:")[-1]
 
     logits_processor = prepare_logits_processor(
         temperature, repetition_penalty, top_p, top_k
@@ -160,10 +166,21 @@ def generate_stream(
                 spaces_between_special_tokens=False,
             )
             if stop_str:
-                pos = output.rfind(stop_str, rfind_start)
-                if pos != -1:
-                    output = output[:pos]
-                    stopped = True
+
+                # if this is a regex, check the generated sequence and return the match until the end if found
+                if stop_regex:
+                    match = re.search(stop_regex_pattern, output[rfind_start:], re.DOTALL)
+                    if match:
+                        pos = match.end()
+                        output = output[:rfind_start + pos]
+                        stopped = True
+
+                # else keep the usual behavior
+                else:
+                    pos = output.rfind(stop_str, rfind_start)
+                    if pos != -1:
+                        output = output[:pos]
+                        stopped = True
             yield output
 
         if stopped:
